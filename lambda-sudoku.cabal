@@ -1,0 +1,19 @@
+Name:            lambda-sudoku
+Version:         0.1
+Description:     A Sudoku solver/generator.
+License:         GPL
+License-file:    LICENSE
+Author:          Armin Häberling
+Maintainer:      armin.aha@gmail.com
+Build-Type:      Simple
+
+Executable:      glsudoku
+Build-Depends:   base,
+                 random >= 1.0.0.0,
+                 array >= 0.1.0.0,
+                 GLUT,
+                 OpenGL
+Main-Is:         GlutGui/Main.hs
+Other-Modules:   Sudoku, Sudoku.Table, GlutGui.GLGui, Utils
+Hs-Source-Dirs:  src
+Ghc-Options:     -Wall -O -optl-s -optl-mwindows
