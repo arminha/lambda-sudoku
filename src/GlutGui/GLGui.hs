@@ -26,7 +26,7 @@ data States =
    { freezeNum :: IORef [(Index,Numbers)] -- ^ freezed numbers
    , otherNum :: IORef [(Index,Numbers)] -- ^ other numbers
    , showMarks :: IORef Bool -- ^ show marks
-   , showFalse :: IORef Bool -- ^ mark false numbers on the field
+   , showMistakes :: IORef Bool -- ^ mark wrong numbers on the field
    , selected :: IORef Index -- ^ selected field
    , showCredit :: IORef Bool -- ^ show credits
    , backtrack :: IORef Bool -- ^ use backtracking to solve puzzles
@@ -41,19 +41,19 @@ initStates =
     freezeNumRef <- newIORef []
     otherNumRef <- newIORef []
     showMarksRef <- newIORef False
-    showFalseRef <- newIORef False
+    showMistakesRef <- newIORef False
     selectedRef <- newIORef (0,0)
     showCreditRef <- newIORef False
     backtrackRef <- newIORef True
     return (States
-	    freezeNumRef 
-	    otherNumRef 
-	    showMarksRef 
-            showFalseRef
-	    selectedRef
-	    showCreditRef
-	    backtrackRef
-	   )
+            freezeNumRef
+            otherNumRef
+            showMarksRef
+            showMistakesRef
+            selectedRef
+            showCreditRef
+            backtrackRef
+           )
 
 -- | The standard menu
 createMenu :: States -> Menu
@@ -66,7 +66,7 @@ createMenu states =
 	 ,MenuEntry "[alt]+[f] Freeze" (menuFreeze states)	 
 	 ,MenuEntry "" (return ())
 	 ,MenuEntry "[m] Toggle Hints" (menuToggleMarks states)
-         ,MenuEntry "[f] Show false on/off" (menuToggleFalse states)
+         ,MenuEntry "[f] Toggle Show Mistakes" (menuToggleShowMistakes states)
 	 ,MenuEntry "[alt]+[s] Solve Puzzle" (menuSolvePuzzle states)
 	 ,MenuEntry "[alt]+[a] Auto Solve" (autoSolvePuzzle states)
 	 ,MenuEntry "" (return ())
@@ -210,10 +210,10 @@ menuToggleMarks states =
     (showMarks states) $~ not
     postRedisplay Nothing
 
-menuToggleFalse :: States -> IO ()
-menuToggleFalse states =
+menuToggleShowMistakes :: States -> IO ()
+menuToggleShowMistakes states =
     do
-    (showFalse states) $~ not
+    (showMistakes states) $~ not
     postRedisplay Nothing
 
 -- | Show the credits screen
@@ -261,9 +261,9 @@ display states =
     displayBackground
     ind <- get $ selected states
     displaySelection ind
-    sf <- get $ showFalse states
+    sf <- get $ showMistakes states
     if sf
-       then displayFalse states
+       then displayMistakes states
        else return ()
     displayTable
     lineAntialiasing <- get lineSmooth
@@ -333,8 +333,8 @@ markField ind markcolor =
 				      ]
 
 -- | mark false numbers
-displayFalse :: States -> IO ()
-displayFalse states =
+displayMistakes :: States -> IO ()
+displayMistakes states =
     do
     let markcolor = Color4 0.7 0.1 0.1 0.7
     freeze <- get $ freezeNum states
@@ -505,7 +505,7 @@ keyboardMouse states (Char c) Down modifier _
 				(otherNum states) $~ (\x -> [el | el <- x, fst el /= ind])
 				postRedisplay Nothing
     | c == 'm' = menuToggleMarks states
-    | c == 'f' && alt modifier == Up = menuToggleFalse states
+    | c == 'f' && alt modifier == Up = menuToggleShowMistakes states
     | c == 'b' = menuBack states
     | c == 'r' = menuRevert states
     | c == 'f' && alt modifier == Down = menuFreeze states
